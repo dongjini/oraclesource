@@ -17,6 +17,12 @@
 -- 개발자 : CR(Read)UD
 -- SQL(Structured Query Language : 구조질의언어) : RDBMS 데이터를 다루는 언어
 
+-- sql 구문 실행 순서
+-- 3. SELECT 
+-- 1. FROM EMP e 
+-- 2. WHERE
+-- 4. ORDER by
+
 
 -- 1. 조회(SELECT) - Read
 -- 사원정보조회(전체조회)
@@ -127,6 +133,7 @@ WHERE
 -- 6) 범위 : BETWEEN A AND B
 -- 7) 검색연산자 : LIKE 연산자와 와일드카드(_, %)
 -- 8) IS NULL : 널과 같다
+-- 9) 집합 연산자 : UNION(합집합), MINUS(차집합), INTERSECT(교집합)
 
 -- 연봉이(SAL*12) 36000 인 사원 조회
 SELECT
@@ -226,6 +233,275 @@ WHERE E.MGR IS NULL;
 SELECT *
 FROM EMP e 
 WHERE E.MGR IS NOT NULL;
+
+             
+-- 집합연산자
+-- UNION(합집합)
+-- 부서번호 10, 20 사원조회(OR, IN)
+SELECT * FROM EMP E WHERE E.DEPTNO = 10 OR E.DEPTNO = 20;
+SELECT * FROM EMP E WHERE E.DEPTNO IN ( 10,  20);
+
+SELECT E.EMPNO, E.ENAME, E.SAL  FROM EMP E WHERE E.DEPTNO = 10
+UNION 
+SELECT E.EMPNO, E.ENAME, E.SAL  FROM EMP e  WHERE E.DEPTNO = 20;
+
+-- 타입 일치만 확인 => 타입이 맞는다면 연결
+SELECT E.EMPNO, E.ENAME, E.SAL, E.DEPTNO  FROM EMP E WHERE E.DEPTNO = 10
+UNION 
+SELECT E.EMPNO, E.JOB , E.SAL, E.DEPTNO  FROM EMP e  WHERE E.DEPTNO = 20;
+
+-- UNION(중복 제외하고 출력), UNION ALL (중복 데이터도 출력)
+SELECT E.EMPNO, E.ENAME, E.SAL, E.DEPTNO  FROM EMP E WHERE E.DEPTNO = 10
+UNION 
+SELECT E.EMPNO, E.ENAME, E.SAL, E.DEPTNO  FROM EMP E WHERE E.DEPTNO = 10;
+
+SELECT E.EMPNO, E.ENAME, E.SAL, E.DEPTNO  FROM EMP E WHERE E.DEPTNO = 10
+UNION all 
+SELECT E.EMPNO, E.ENAME, E.SAL, E.DEPTNO  FROM EMP E WHERE E.DEPTNO = 10;
+
+-- MINUS(차집합)
+SELECT E.EMPNO, E.ENAME, E.SAL, E.DEPTNO  FROM EMP e 
+MINUS
+SELECT E.EMPNO, E.ENAME, E.SAL, E.DEPTNO  FROM EMP E WHERE E.DEPTNO = 10;
+
+
+-- INTERSECT(교집합)
+SELECT E.EMPNO, E.ENAME, E.SAL, E.DEPTNO  FROM EMP e 
+INTERSECT 
+SELECT E.EMPNO, E.ENAME, E.SAL, E.DEPTNO  FROM EMP E WHERE E.DEPTNO = 10;
+
+-- 오라클 함수
+-- 내장함수
+-- 1) 문자함수
+-- 대소문자를 바꿔주는 함수 : uppr(), lower(), initcap()
+-- 문자의 길이를 구하는 함수 : LENGTH(), LENGTHB()
+-- 문자열 일부 추출 : SUBSTR(문자열데이터, 시작위치, 추출길이)
+-- 문자열 데이터 안에서 특정 문자 위치 찾기 : INSTR()
+-- 특정 문자를 다른 문자로 변경 : REPLACE(원본문자열, 찾을문자열, 변경문자열)
+-- 두 문자열 데이터를 합치기 : CONCAT(문자열1, 문자열2), 문자열1 | 문자열2 | 문자열3
+-- 특정 문자 제거 : TRIM(), LTRIM(), RTRIM()
+
+-- 사원이름 대문자, 소문자, 첫만자만 대문자로 변경
+SELECT e.ENAME, upper(e.ENAME), LOWER(e.ENAME), initcap(e.ENAME)
+FROM EMP e ;
+
+-- 제목 oracle 검색
+-- LIKE '%oracle%' OR LIKE '%ORACLE%' OR LIKE '%Oracle%'
+--SELECT *
+--FROM board
+--WHERE upper(title) = upper('oracle')
+
+-- 사원명 길이 구하기
+SELECT e.ENAME, LENGTH(e.ENAME)
+FROM EMP e ;
+
+-- 사원명이 5글자 이상인 사원 조회
+SELECT *
+FROM EMP e 
+WHERE length(e.ename) >= 5;
+
+-- LENGTHB() : 문자열 바이트 수 반환
+-- XE 버전 : 한글에 3BYTE 사용
+-- dual : sys 소유 테이블(임시 연산이나 함수의 결과값 확인 용도로 사용)
+SELECT LENGTH('한글'), LENGTHB('한글')
+FROM dual;
+
+-- 시작위치 지정 시 양수(왼쪽), 음수(오른쪽부터 : 맨 끝부터 -1 )
+SELECT E.JOB, SUBSTR(E.JOB, 1, 2), SUBSTR(E.JOB, 5)
+FROM EMP e 
+
+SELECT
+	E.JOB,
+	SUBSTR(E.JOB, -LENGTH(E.JOB)),
+	SUBSTR(E.JOB, -LENGTH(E.JOB), 2),
+	SUBSTR(E.JOB, -3)
+FROM
+	EMP e 
+
+
+-- INSTR(대상문자열, 위치를 찾으려는 문자, 시작위치, 시작위치에서 찾으려는 문자가 몇 변째인)
+SELECT
+	INSTR('HELLO, ORACLE', 'L') AS INSTR_1,
+	INSTR('HELLO, ORACLE', 'L', 5) AS INSTR_2,
+	INSTR('HELLO, ORACLE', 'L', 2, 2) AS INSTR_3
+FROM
+	DUAL;
+
+-- 사원 이름에 S가 있는 사원 조회
+SELECT *
+FROM EMP e 
+WHERE E.ENAME LIKE '%S%';
+
+SELECT *
+FROM EMP e 
+WHERE INSTR(e.ename, 'S') > 0;
+
+-- REPLACE(원본문자열, 찾을문자열, 변경문자열)
+SELECT
+	'010-1234-5678' AS REPLACE_BEFORE.
+	REPLACE('010-1234-5678', '-', ' ') AS REPLACE1,
+	REPLACE('010-1234-5678', '-', ' ') AS REPLACE2
+FROM 
+	DUAL;
+
+-- CONCAT(문자열1, 문자열2)
+-- 사번 : 사원명
+SELECT CONCAT(E.EMPNO, CONCAT(' : ', E.ENAME))
+FROM EMP e ;
+
+SELECT E.ENAME || ' : ' || E.ENAME
+FROM EMP e ;
+
+
+-- TRIM(삭제옵션(선택), 삭제할 문자(선택)) FROM 원본문자열(필수)
+SELECT
+	'[' || TRIM(' __Oracle__ ') || ']' AS trim,
+	'[' || TRIM(LEADING FROM ' __Oracle__ ') || ']' AS trim_leading,
+	'[' || TRIM(TRAILING FROM ' __Oracle__ ') || ']' AS trim_trailing,
+	'[' || TRIM(BOTH FROM ' __Oracle__ ') || ']' AS trim_both
+FROM
+	DUAL;
+
+-- LTRIM(), RTRIM()
+SELECT
+	'[' || TRIM(' __Oracle__ ') || ']' AS trim,
+	'[' || LTRIM(' __Oracle__ ') || ']' AS Ltrim,
+	'[' || RTRIM(' __Oracle__ ') || ']' AS RTRIM,
+	'[' || RTRIM('<_Oracle_>', '>_') || ']' AS RTRIM2
+FROM
+	DUAL;
+
+-- 숫자함수
+-- 반올림 : ROUND()
+-- 버림 : TRUNC()
+-- 가장 큰 정수 : CEIL()
+-- 가장 작은 정수 : FLOOR()
+-- 나머지 : MOD()
+
+--    -2-1 0 1 2   
+-- 1 2 3 4 . 5 6 7 8
+SELECT 
+		ROUND(1234.5678) AS ROUND,
+		ROUND(1234.5678, 0) AS ROUND1,
+		ROUND(1234.5678, 1) AS ROUND2,
+		ROUND(1234.5678, 2) AS ROUND3,
+		ROUND(1234.5678, -1) AS ROUND4,
+		ROUND(1234.5678, -2) AS ROUND5
+FROM
+	DUAL;
+
+
+SELECT 
+		TRUNC(1234.5678) AS TRUNC,
+		TRUNC(1234.5678, 0) AS TRUNC1,
+		TRUNC(1234.5678, 1) AS TRUNC2,
+		TRUNC(1234.5678, 2) AS TRUNC3,
+		TRUNC(1234.5678, -1) AS TRUNC4,
+		TRUNC(1234.5678, -2) AS TRUNC5
+FROM
+	DUAL;
+
+
+SELECT CEIL(3.14), FLOOR(3.14), CEIL(-3.14), FLOOR(-3.14)
+FROM DUAL;
+
+
+SELECT MOD(15,6), MOD(10,2), MOD(11,2)
+FROM DUAL;
+
+-- 날짜함수
+-- 오늘날짜/시간 : SYSDATE
+-- 몇개월 이후 날짜 구하기 : ADD_MONTHS()
+-- 두 날짜 간의 개월 수 차이 구하기 : MONTHS_BETWEEN()
+-- 돌아오는 요일, 달의 마지막 날짜 구하기 : NEXT_DAY() / LAST_DAY()
+
+SELECT
+	SYSDATE AS NOW,
+	SYSDATE-1 YESTERDAY,
+	SYSDATE + 1 AS TOMORROW,
+	CURRENT_DATE AS CURRENT_DATE,
+	CURRENT_TIMESTAMP AS CURRENT_TIMESTAMP
+FROM
+	DUAL;
+
+-- 오늘날짜를 기준으로 3개월 이후 날짜 구하기
+SELECT SYSDATE, ADD_MONTHS(SYSDATE, 3)
+FROM DUAL;
+
+-- 입사한지 40년이 넘은 사원 조회
+SELECT *
+FROM EMP e 
+WHERE ADD_MONTHS(e.hiredate, 480) < sysdate;
+
+-- 오늘날짜와 입사일자의 차이 구하기
+SELECT
+	e.EMPNO,
+	e.ENAME,
+	e.HIREDATE,
+	sysdate,
+	MONTHS_BETWEEN(e.HIREDATE, sysdate) AS month1,
+	MONTHS_BETWEEN(sysdate, e.HIREDATE) AS month2,
+	TRUNC(MONTHS_BETWEEN(e.HIREDATE, sysdate)) AS month3
+FROM
+	EMP e ;
+
+
+SELECT SYSDATE, NEXT_DAY(sysdate, '월요일'), LAST_DAY(sysdate)
+FROM DUAL;
+
+-- 자료형을 변환하는 형변환 함수
+-- TO_CHAR() : 숫자 또는 날짜 데이터를 문자열 데이터로 변환
+-- TO_NUMBER() : 문자열 데이터를 숫자 데이터로 변환
+-- TO_DATE() : 문자열 데이터를 날짜 데이터로 변환
+
+
+-- number + '문자숫자' : 덧셈 가능(자동형변환)
+SELECT e.EMPNO, e.ENAME, e.EMPNO + '500'
+FROM EMP e 
+WHERE e.ENAME = 'SMITH';
+
+SELECT sysdate, to_char(sysdate, 'YYYY/MM/DD')
+FROM dual;
+
+SELECT
+	sysdate,
+	to_char(sysdate, 'MM'), -- 03
+	to_char(sysdate, 'MON'), -- 3월
+	to_char(sysdate, 'MONTH'), -- 3월
+	to_char(sysdate, 'DD'), -- 19
+	to_char(sysdate, 'DY'), -- 수
+	to_char(sysdate, 'DAY'), -- 수요일
+	to_char(sysdate, 'HH24:MI:SS'), -- 17:58:55
+	to_char(sysdate, 'HH12:MI:SS AM'), -- 05:58:55 오후
+	to_char(sysdate, 'HH:MI:SS PM') -- 05:58:55 오후
+FROM
+	dual;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
