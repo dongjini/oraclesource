@@ -1371,16 +1371,22 @@ TRUNCATE TABLE EMP_RENAME; --> ROLLBACK 불가능
 DROP TABLE EMP_RENAME;
 
 -- MEMBER 테이블 생성하기
--- ID VARCHAR2(8) / NAME 10 / ADDR 50 / EMAIL 30 / AGE NUMBER(4)
-CREATE TABLE NUMBER_EMP(
-	ID VARCHAR2(8),
-	NAME VARCHAR2(10),
+-- ID VARCHAR2(8) pk / NAME 10 not null / ADDR 50 / EMAIL 30 not null/ AGE NUMBER(4)
+-- 
+CREATE TABLE member(
+	NO NUMBER(8) UNIQUE,
+	ID VARCHAR2(8) PRIMARY KEY,
+	NAME VARCHAR2(10) NOT NULL,
 	ADDR VARCHAR2(50),
-	EMAIL VARCHAR2(30),
+	EMAIL VARCHAR2(30) NOT NULL,
 	AGE NUMBER(4, 0) 
+);
+
 -- insert(remark x)
 INSERT INTO MEMBER(id, name, addr, email, age)
 VALUES('hong123', '홍길동', '서울시 종로구', 'hong123@gmail.com', 24);
+
+DROP TABLE MEMBER;
 
 
 
@@ -1472,7 +1478,12 @@ CREATE SEQUENCE member_seq;
 
 
 INSERT INTO MEMBER(NO, id, name, addr, email, age)
-VALUES(member_seq.nextval, 'hong123', '홍길동', '서울시 종로구', 'hong123@gmail.com', 24);
+VALUES(member_seq.nextval, 'hong127', '홍길동', '서울시 종로구', 'hong123@gmail.com', 24);
+
+-- id : pk (not null + unique) : 행 하나만 나옴
+SELECT * FROM MEMBER WHERE id = 'hong123';
+
+select * from member where name like '%홍%';
 
 -- 시퀀스명.currval : 가장 마지막으로 생성된 시퀀스 확인
 -- 시퀀스명.nextval : 시퀀스 발행
@@ -1683,17 +1694,38 @@ VALUES(9999, 'TEST1', 'PARTNER', SYSDATE, 2500, 20);
 -- 부모 삭제 시 자식의 부서는 NULL이 됨(ON DELETE SET NULL)
 DELETE FROM DEPT_FK WHERE DEPTNO = 20;
 
+-- CHECK : 데이터의 형태와 범위를 지정
+CREATE TABLE TBL_CHECK(
+	LOGIN_ID VARCHAR2(20) PRIMARY KEY,
+	LOGIN_PWD VARCHAR2(20) CHECK (LENGTH(LOGIN_PWD) > 3),
+	TEL VARCHAR2(20) 
+);
+
+-- 체크 제약조건(SCOTT.SYS_C008397)이 위배되었습니다
+INSERT INTO TBL_CHECK 
+VALUES ('TEST_ID', '102', '010-1234-1234');
 
 
+INSERT INTO TBL_CHECK 
+VALUES ('TEST_ID', '1021', '010-1234-1234');
 
 
+-- DEFAULT : 기본값
+CREATE TABLE TBL_DEFAULT(
+	LOGIN_ID VARCHAR2(20) PRIMARY KEY,
+	LOGIN_PWD VARCHAR2(20) DEFAULT '1234',
+	TEL VARCHAR2(20) 
+);
 
+INSERT INTO TBL_DEFAULT(LOGIN_ID, TEL)
 
+CREATE TABLE BOARD(
+	ID NUMBER(8) PRIMARY KEY,
+	NAME VARCHAR2(20) NOT NULL,
+	REGDATE DATE DEFAULT SYSDATE 
+);
 
-
-
-
-
+INSERT INTO BOARD(ID, NAME) VALUES (1, '홍길동');
 
 
 
