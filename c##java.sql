@@ -15,3 +15,15 @@ values(board_seq.nextval, 'title1', 'content1', 'user1');
 
 INSERT INTO STUDENTTBL(name) values('홍길동');
 INSERT INTO STUDENTTBL(name) values('성춘향');
+
+
+-- Team(부모) 과 TeamMember(자식) 외래키 제약조건
+
+-- insert : 부모 먼저 한다
+INSERT INTO TEAM(TEAM_NAME) VALUES('vistory');
+INSERT INTO TEAM(TEAM_NAME) VALUES('hope');
+
+INSERT INTO TEAM_MEMBER (USER_NAME, TEAM_TEAM_ID) VALUES ('홍길동', 1);
+INSERT INTO TEAM_MEMBER (USER_NAME, TEAM_TEAM_ID) VALUES ('성춘향', 2);
+
+-- delete : 자식 먼저 한다.
