@@ -181,13 +181,48 @@ FROM
 	
 
 
+-- 1번 게시물에 달려있는 댓글 전체 가져오기
+SELECT * FROM reply WHERE board_id = 1;
 
 
+-- 영화 이미지 추출
+SELECT
+	mi.*, m.*, 
+	(SELECT count(r.rno) FROM REVIEW r WHERE r.MOVIE_MNO =mi.MOVIE_MNO ) AS cnt,
+	(SELECT avg(r.grade) FROM REVIEW r WHERE r.MOVIE_MNO =mi.MOVIE_MNO ) ad avg
+FROM
+	movie_image mi
+LEFT JOIN MOVIE m ON
+	mi.MOVIE_MNO = m.MNO
+WHERE
+	mi.inum IN (
+	SELECT
+		min(mi.INUM)
+	FROM
+		MOVIE_IMAGE mi
+	GROUP BY
+		mi.MOVIE_MNO);
+
+-- 영화정보 + 평균평점 + 리뷰수+영화이미지
+SELECT
+	mi.*, m.*, 
+	(SELECT count(r.rno) FROM REVIEW r WHERE r.MOVIE_MNO =mi.MOVIE_MNO ) AS cnt,
+	(SELECT avg(r.grade) FROM REVIEW r WHERE r.MOVIE_MNO =mi.MOVIE_MNO ) ad avg
+FROM
+	movie_image mi LEFT JOIN movie m ON 
+	
+	WHERE mi.movie_MNO = 2;
 
 
+	
+	
 
-
-
+SELECT
+	*
+FROM
+	MOVIE_IMAGE mi
+WHERE
+	mi.path = to_char(sysdate-4, 'yyyy\mm\dd')
 
 
 
